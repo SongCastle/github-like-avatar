@@ -13,7 +13,7 @@ Generate GitHub like avatar.
 ## How To Use
 
 ```rb
-# Generate a avatar (5 × 20)
+# Generate an avatar (5 × 20)
 GitHubLikeAvatar.generate('avatar.png', blocks: 5, block_size: 20) do |path|
   # something like ...
   # FileUtils.cp(path, <dest_path>)
@@ -23,6 +23,6 @@ end
 or
 
 ```rb
-# Generate a avatar (10 × 15)
+# Generate an avatar (10 × 15)
 path = GitHubLikeAvatar.generate('avatar.png', blocks: 10, block_size: 15)
 ```
