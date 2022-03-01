@@ -29,7 +29,7 @@ module GitHubLikeAvatar
     # # e.g.
     # GitHubLikeAvatar.generate('avatar.png', blocks: 5, block_size: 20) do |path|
     #   # something like ...
-    #   # FileUtils.cp(path, <destination_path>)
+    #   # FileUtils.cp(path, <dest_path>)
     # end
     # ```
     #
