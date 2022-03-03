@@ -1,9 +1,9 @@
 # github_like_avatar
 Generate a GitHub like avatar.
 
-|5 × 30|6 × 25|10 × 15|
-|:-:|:-:|:-:|
-|![5-30](https://user-images.githubusercontent.com/47803499/156241136-cc2f04e7-ea72-41d4-9a55-58d1a2874d53.png)|![6-25](https://user-images.githubusercontent.com/47803499/156241634-90c0c019-330e-41c1-85cd-10ea77665550.png)|![10-15](https://user-images.githubusercontent.com/47803499/156241101-2c65e612-b744-4311-b4e1-fe17667e0eb8.png)|
+5 × 30|6 × 25|10 × 15
+:-:|:-:|:-:
+![5-30-v2](https://user-images.githubusercontent.com/47803499/156612391-106e9c01-62c1-46a9-bc4e-9afd78476b93.png)|![6-25-v2](https://user-images.githubusercontent.com/47803499/156612394-b0edac5f-c6da-41d1-90fd-bf8def74ee19.png)|![10-15-v2](https://user-images.githubusercontent.com/47803499/156612397-c705acaf-6ef9-453c-b00c-ffa4644f5eed.png)
 
 ## Requirements
 
