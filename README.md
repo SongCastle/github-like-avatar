@@ -1,5 +1,5 @@
-# github-like-avatar
-Generate GitHub like avatar.
+# github_like_avatar
+Generate a GitHub like avatar.
 
 |5 × 30|6 × 25|10 × 15|
 |:-:|:-:|:-:|
