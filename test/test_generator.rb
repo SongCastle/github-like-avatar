@@ -1,3 +1,4 @@
+require 'pathname'
 require_relative 'test_helper'
 
 describe GitHubLikeAvatar do
