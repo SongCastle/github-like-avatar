@@ -7,8 +7,9 @@
 # ruby-vips required.
 #
 
+require 'tmpdir'
 require 'ruby-vips'
-require 'github_like_avatar/empty_image'
+require_relative 'empty_image'
 
 module GitHubLikeAvatar
   class InvalidFileName   < ArgumentError; end
@@ -38,49 +39,54 @@ module GitHubLikeAvatar
       raise InvalidBlocks     unless blocks.is_a?(Integer) && blocks > 0
       raise InvalidBlockSizes unless block_size.is_a?(Integer) && block_size > 0
 
-      half_blocks = (blocks / 2.0).ceil
-      is_four, is_six = blocks == 4, blocks == 6
+      half_blocks = blocks / 2.0
+      half_c_blocks = half_blocks.ceil
 
-      dominant_color, dominant_color2 = rand * 256, rand * 256
-      my_dominant_color = -> { rand > 0.9 ? dominant_color : dominant_color2 }
-
-      pixcels =
-        (half_blocks * blocks).times.map do |i|
-          if is_four
-            random_color(![4, 5, 6].include?(i), my_dominant_color.())
-          elsif is_six
-            random_color(![13, 14].include?(i), my_dominant_color.())
-          else
-            random_color
-          end
-        end
-
-      i = 0
       image = EmptyImage.new
-      half_blocks.times do
+      (half_c_blocks - 1).times do
         row = EmptyImage.new
         blocks.times do
           row = row.join(
-            Vips::Image.black(block_size, block_size) + pixcels[i],
+            Vips::Image.black(block_size, block_size) + random_color,
             :vertical
           )
-          i += 1
         end
         image = image.join(row, :horizontal)
       end
 
-      flipped_image = image.flip(:horizontal)
-      if blocks.odd?
-        flipped_image = flipped_image.extract_area(
-          block_size, 0, (blocks - half_blocks) * block_size, blocks * block_size
+      dominant_color, dominant_color2 = rand * 256, rand * 256
+      my_dominant_color = -> { rand > 0.9 ? dominant_color : dominant_color2 }
+
+      can_be_blank_color = -> (n) do
+        (half_blocks <= n) || (n == 0) && (2 < blocks)
+      end
+
+      row = EmptyImage.new
+      blocks.times do |i|
+        color = random_color(
+          can_be_blank_color.(i),
+          my_dominant_color.()
         )
+        row = row.join(
+          Vips::Image.black(block_size, block_size) + color,
+          :vertical
+        )
+      end
+      image = image.join(row, :horizontal)
+
+      if blocks > 1
+        flipped_image = image.flip(:horizontal)
+        if blocks.odd?
+          flipped_image = flipped_image.extract_area(
+            block_size, 0, (blocks - half_c_blocks) * block_size, blocks * block_size
+          )
+        end
+        image = image.join(flipped_image, :horizontal)
       end
 
       write_avatar = -> (dir) do
-        avatar = image.join(flipped_image, :horizontal)
-
         File.join(dir, filename).tap do |path|
-          avatar.write_to_file(path)
+          image.write_to_file(path)
         end
       end
 
