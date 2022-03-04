@@ -3,8 +3,6 @@ require_relative 'test_helper'
 
 describe GitHubLikeAvatar do
   describe '.generate' do
-    subject { GitHubLikeAvatar.generate(*args) }
-
     it 'yield a generated avatar\'s path' do
       _path = nil
 
@@ -30,6 +28,7 @@ describe GitHubLikeAvatar do
       it 'yield a generated avatar\'s path with the specified size (blocks)' do
         GitHubLikeAvatar.generate('a.png', blocks: 10) do |path|
           expect(path).must_be_kind_of(String)
+          expect(path.end_with?('a.png')).must_equal(true)
           expect(File.exist?(path)).must_equal(true)
 
           image = Vips::Image.new_from_file(path)
@@ -65,6 +64,30 @@ describe GitHubLikeAvatar do
         expect(image.height).must_equal(150)
 
         FileUtils.rm_r(Pathname(path).dirname, :secure => true)
+      end
+    end
+
+    describe 'when invalid filename' do
+      it 'raise GitHubLikeAvatar::InvalidFileName' do
+        expect {
+          GitHubLikeAvatar.generate(-1)
+        }.must_raise(GitHubLikeAvatar::InvalidFileName)
+      end
+    end
+
+    describe 'when invalid blocks option' do
+      it 'raise GitHubLikeAvatar::InvalidBlocks' do
+        expect {
+          GitHubLikeAvatar.generate('a.png', blocks: -1)
+        }.must_raise(GitHubLikeAvatar::InvalidBlocks)
+      end
+    end
+
+    describe 'when invalid block_size option' do
+      it 'raise GitHubLikeAvatar::InvalidBlockSize' do
+        expect {
+          GitHubLikeAvatar.generate('a.png', block_size: -1)
+        }.must_raise(GitHubLikeAvatar::InvalidBlockSize)
       end
     end
   end
