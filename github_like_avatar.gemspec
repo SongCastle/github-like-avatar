@@ -1,7 +1,7 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require_relative 'lib/github_like_avatar/version'
+require 'github_like_avatar/version'
 
 Gem::Specification.new do |s|
   s.name        = 'github_like_avatar'
