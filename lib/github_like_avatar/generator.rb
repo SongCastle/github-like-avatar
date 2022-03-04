@@ -9,12 +9,11 @@
 
 require 'tmpdir'
 require 'ruby-vips'
-require_relative 'empty_image'
 
 module GitHubLikeAvatar
-  class InvalidFileName   < ArgumentError; end
-  class InvalidBlocks     < ArgumentError; end
-  class InvalidBlockSizes < ArgumentError; end
+  class InvalidFileName  < ArgumentError; end
+  class InvalidBlocks    < ArgumentError; end
+  class InvalidBlockSize < ArgumentError; end
 
   DEFAULT_BLOCKS = 5
   DEFAULT_BLOCK_SIZE = 30
@@ -35,44 +34,33 @@ module GitHubLikeAvatar
     # ```
     #
     def generate(filename, blocks: DEFAULT_BLOCKS, block_size: DEFAULT_BLOCK_SIZE)
-      raise InvalidFileName   unless filename.is_a?(String)
-      raise InvalidBlocks     unless blocks.is_a?(Integer) && blocks > 0
-      raise InvalidBlockSizes unless block_size.is_a?(Integer) && block_size > 0
+      raise InvalidFileName  unless filename.is_a?(String)
+      raise InvalidBlocks    unless blocks.is_a?(Integer) && blocks > 0
+      raise InvalidBlockSize unless block_size.is_a?(Integer) && block_size > 0
 
-      half_blocks = blocks / 2.0
+      too_small, half_blocks = blocks <= 2, blocks / 2.0
       half_c_blocks = half_blocks.ceil
-
-      image = EmptyImage.new
-      (half_c_blocks - 1).times do
-        row = EmptyImage.new
-        blocks.times do
-          row = row.join(
-            Vips::Image.black(block_size, block_size) + random_color,
-            :vertical
-          )
-        end
-        image = image.join(row, :horizontal)
-      end
-
+  
       dominant_color, dominant_color2 = rand * 256, rand * 256
-      my_dominant_color = -> { rand > 0.9 ? dominant_color : dominant_color2 }
 
-      can_be_blank_color = -> (n) do
-        (half_blocks <= n) || (n == 0) && (2 < blocks)
-      end
-
-      row = EmptyImage.new
-      blocks.times do |i|
-        color = random_color(
-          can_be_blank_color.(i),
-          my_dominant_color.()
-        )
-        row = row.join(
-          Vips::Image.black(block_size, block_size) + color,
-          :vertical
+      color_func = -> n do
+        random_color(
+          ((half_blocks <= n) || (n == 0) && !too_small),
+          (rand > 0.9 ? dominant_color : dominant_color2)
         )
       end
-      image = image.join(row, :horizontal)
+      blankable_color = Proc.new { random_color }
+
+      image =
+        half_c_blocks.times.inject(nil) do |i|
+          col =
+            blocks.times.inject(nil) do |j, n|
+              piece = Vips::Image.black(block_size, block_size) + color_func.(n)
+              j ? j.join(piece, :vertical) : piece
+            end
+          color_func = blankable_color
+          i ? col.join(i, :horizontal) : col
+        end
 
       if blocks > 1
         flipped_image = image.flip(:horizontal)
@@ -84,7 +72,7 @@ module GitHubLikeAvatar
         image = image.join(flipped_image, :horizontal)
       end
 
-      write_avatar = -> (dir) do
+      write_avatar = -> dir do
         File.join(dir, filename).tap do |path|
           image.write_to_file(path)
         end
